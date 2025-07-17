@@ -1,0 +1,1 @@
+17.07.2025 - Created loadImages function and displayed the board on the webpage
