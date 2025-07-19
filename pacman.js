@@ -20,6 +20,10 @@ let orangeGhostImage;
 let pinkGhostImage;
 let redGhostImage;
 
+// Flag to toggle the drawing of marks
+let drawMarksFlag = false;
+
+
 // Displays the board when the page is loaded
 window.onload = function () {
   board = document.getElementById('board');
@@ -41,6 +45,8 @@ window.onload = function () {
 
   // Print the size of all sets for debugging
   ensureCorrectAmounts();
+
+  drawSwitch(); // Draw the switch for toggling features
 }
 
 // Check if the number of walls, foods, and ghosts matches the expected amounts
@@ -199,10 +205,15 @@ function drawBoard() {
 }
 
 // document.fonts.ready.then(() => {
-//   drawMarks(); // or trigger your game loop
+//   drawSwitch();  // Draw the switch for toggling features
 // });
 
 function drawMarks() {
+  // Apply smooth transition style before shifting
+  board.style.transition = "ease-in-out 1s";
+  // Shift the canvas downward
+  board.style.marginTop = "100px"; // You can adjust this value
+
   context.font = "14px Arial";
   context.fillStyle = "white";
   context.textAlign = "center";
@@ -255,6 +266,9 @@ function update() {
 
 
 function draw() {
+  // Clear the board
+  context.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+
   context.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height); // Draw Pacman
 
   // Draw ghosts
@@ -293,9 +307,43 @@ function draw() {
   //   context.fillRect(food.x, food.y, food.width, food.height);
   // }
 
-    //drawMarks();
-
+  if (drawMarksFlag) {
+    drawMarks();
+  }
 }
+
+function drawSwitch() {
+// Create the container label
+  const switchLabel = document.createElement("label");
+  switchLabel.classList.add("switch");
+
+  // Create the checkbox input
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+
+  // Create the slider span
+  const sliderSpan = document.createElement("span");
+  sliderSpan.classList.add("slider");
+
+  // Assemble the elements
+  switchLabel.appendChild(checkbox);
+  switchLabel.appendChild(sliderSpan);
+
+  // Append to the body or any other container
+  document.body.appendChild(switchLabel);
+
+  checkbox.addEventListener("change", () => {
+    if (checkbox.checked) {
+      drawMarksFlag = true;
+      drawMarks(); // Call your function when switch is ON
+    } else {
+      drawMarksFlag = false;
+      board.style.marginTop = "0px"; // Example of undoing a change
+      // You can also add a clearOverlay() or redrawBoard() if needed
+    }
+  });
+}
+
 // Class to represent a block in the game
 class Block {
   constructor(image, x, y, width, height) {
