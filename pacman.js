@@ -38,7 +38,7 @@ window.onload = function () {
     checkImageDrawStatus();
   }, 200); // Give time for images to be drawn
 
-  
+
   // Print the size of all sets for debugging
   ensureCorrectAmounts();
 }
@@ -73,7 +73,7 @@ function checkImageDrawStatus() {
     { name: "Blue Ghost", image: blueGhostImage },
     { name: "Orange Ghost", image: orangeGhostImage },
     { name: "Pink Ghost", image: pinkGhostImage },
-    { name: "Red Ghost", image: redGhostImage },
+    { name: "Red Ghost", image: redGhostImage }
   ];
 
   imageStatus.forEach(({ name, image }) => {
@@ -83,27 +83,6 @@ function checkImageDrawStatus() {
       console.log(`✅ ${name} image loaded and drawable.`);
     }
   });
-
-
-  // const imageStatus = [
-  //   { name: "Wall", image: wallImage },
-  //   { name: "Pacman Up", image: pacmanUpImage },
-  //   { name: "Pacman Down", image: pacmanDownImage },
-  //   { name: "Pacman Left", image: pacmanLeftImage },
-  //   { name: "Pacman Right", image: pacmanRightImage },
-  //   { name: "Blue Ghost", image: blueGhostImage },
-  //   { name: "Orange Ghost", image: orangeGhostImage },
-  //   { name: "Pink Ghost", image: pinkGhostImage },
-  //   { name: "Red Ghost", image: redGhostImage },
-  // ];
-
-  // imageStatus.forEach(({ name, image }) => {
-  //   if (!image.complete || image.naturalWidth === 0) {
-  //     console.error(`❌ ${name} image failed to load or draw.`);
-  //   } else {
-  //     console.log(`✅ ${name} image loaded and drawable.`);
-  //   }
-  // });
 }
 
 
@@ -219,7 +198,40 @@ function drawBoard() {
   }
 }
 
-let imageDrawChecked = false;
+// document.fonts.ready.then(() => {
+//   drawMarks(); // or trigger your game loop
+// });
+
+function drawMarks() {
+  context.font = "14px Arial";
+  context.fillStyle = "white";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+for (let r = 0; r < ROW_COUNT; r++) {
+    for (let c = 0; c < COLUMN_COUNT; c++) {
+      const tileMapChar = tileMap[r][c];
+      const x = c * TILE_SIZE;
+      const y = r * TILE_SIZE;
+
+      if (tileMapChar === 'X') {
+        context.font = "14px Arial";
+        context.fillStyle = "white";
+        context.fillText('X', x + TILE_SIZE / 2, y + TILE_SIZE / 2);
+      } else if (tileMapChar === ' ') {
+        context.font = "10px PixelArial11";
+        context.fillStyle = "#e0e0e0";
+        context.fillText('•', x + TILE_SIZE / 2, y + TILE_SIZE / 2);
+      }
+      else if (tileMapChar === 'O') { // Air
+        context.font = "18px PixelArial11";
+        context.fillStyle = "#e0e0e0";
+        context.fillText('air', x + TILE_SIZE / 2, y + TILE_SIZE / 2);
+      }
+    }
+  }
+}
+
 // Game loop
 function update() {
   // move();
@@ -251,11 +263,19 @@ function draw() {
     }
   );
 
+  // for (let ghost of ghosts.values()) {
+  //   context.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height);
+  // }
+
   // Draw walls
   walls.forEach(wall => {
       context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height);
     }
   );
+
+  // for (let wall of walls.values()) {
+  //   context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height);
+  // }
 
   // Draw foods
   foods.forEach(food => {
@@ -267,6 +287,14 @@ function draw() {
       }
     }
   );
+
+  // context.fillStyle = "white";
+  // for (let food of foods.values()) {
+  //   context.fillRect(food.x, food.y, food.width, food.height);
+  // }
+
+    //drawMarks();
+
 }
 // Class to represent a block in the game
 class Block {

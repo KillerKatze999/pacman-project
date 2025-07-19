@@ -5,3 +5,10 @@ body {
 #board {
   background-color: black;
 }
+
+
+
+@font-face {
+  font-family: 'PixelArial11';
+  src: url('./fonts/PIXEARG_.TTF') format('truetype');
+}
