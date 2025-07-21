@@ -23,6 +23,11 @@ let redGhostImage;
 // Flag to toggle the drawing of marks
 let drawMarksFlag = false;
 
+// Default frame rate
+// This can be changed by the user through a selector
+let selectedFps = 20;
+let frameDisplay; // Paragraph for displaying FPS
+
 
 // Displays the board when the page is loaded
 window.onload = function () {
@@ -47,6 +52,10 @@ window.onload = function () {
   ensureCorrectAmounts();
 
   drawSwitch(); // Draw the switch for toggling features
+  drawSelector(); // Draw the selector for options
+
+  // Add key event listener
+  document.addEventListener("keyup", movePacman);
 }
 
 // Check if the number of walls, foods, and ghosts matches the expected amounts
@@ -245,7 +254,7 @@ for (let r = 0; r < ROW_COUNT; r++) {
 
 // Game loop
 function update() {
-  // move();
+  move();
   draw();
 
   // Uncomment one of the following lines to change the frame rate
@@ -253,7 +262,7 @@ function update() {
   // setTimeout(update, 1000 / 90); // 90 FPS
   // setTimeout(update, 1000 / 75); // 75 FPS
   // setTimeout(update, 1000 / 60); // 60 FPS
-  setTimeout(update, 1000 / 50); // 50 FPS
+  // setTimeout(update, 1000 / 50); // 50 FPS
   // setTimeout(update, 1000 / 45); // 45 FPS
   // setTimeout(update, 1000 / 30); // 30 FPS
   // setTimeout(update, 1000 / 20); // 20 FPS
@@ -262,6 +271,10 @@ function update() {
   // setTimeout(update, 1000 / 5); // 5 FPS
   // setTimeout(update, 1000 / 2); // 2 FPS
   // setTimeout(update, 1000 / 1); // 1 FPS
+
+
+
+  setTimeout(update, 1000 / selectedFps); // Use the selected FPS from the dropdown
 }
 
 
@@ -313,6 +326,10 @@ function draw() {
 }
 
 function drawSwitch() {
+
+    const uiContainer = document.createElement("div");
+  uiContainer.classList.add("ui-container");
+
 // Create the container label
   const switchLabel = document.createElement("label");
   switchLabel.classList.add("switch");
@@ -330,8 +347,9 @@ function drawSwitch() {
   switchLabel.appendChild(sliderSpan);
 
   // Append to the body or any other container
-  document.body.appendChild(switchLabel);
 
+  uiContainer.appendChild(switchLabel);
+  document.body.appendChild(uiContainer);
   checkbox.addEventListener("change", () => {
     if (checkbox.checked) {
       drawMarksFlag = true;
@@ -343,6 +361,91 @@ function drawSwitch() {
     }
   });
 }
+
+function drawSelector() {
+  const uiContainer = document.querySelector(".ui-container");
+
+  // Create the label text
+  const labelText = document.createElement("span");
+  labelText.textContent = "Frame Rate Selector: ";
+  labelText.classList.add("selector-title");
+
+  // Create the container label
+  const selectorLabel = document.createElement("label");
+  selectorLabel.classList.add("selector");
+
+  // Create the select input
+  const select = document.createElement("select");
+
+  // Create the option elements
+  ["120 FPS", "90 FPS", "75 FPS", "60 FPS", "50 FPS", "45 FPS", "30 FPS", "20 FPS", "15 FPS", "10 FPS", "5 FPS", "2 FPS", "1 FPS"].forEach(fps => {
+    const fpsValue = parseInt(fps);
+    const option = document.createElement("option");
+    option.value = fpsValue;
+    option.textContent = `${fpsValue} FPS`;
+    select.appendChild(option);
+  });
+
+  select.value = selectedFps; // Set the default value
+
+  // Create the reset button
+  const resetButton = document.createElement("button");
+  resetButton.textContent = "Reset FPS";
+  resetButton.classList.add("reset-button");
+  resetButton.addEventListener("click", () => {
+    selectedFps = 20; // Reset to default FPS
+    select.value = selectedFps; // Update the select input
+    frameDisplay.textContent = `Current FPS: ${selectedFps}`; // Update the display
+    console.log(`FPS reset to: ${selectedFps}`);
+  });
+
+  // Create a paragraph to display the current FPS
+  frameDisplay = document.createElement("p");
+  frameDisplay.textContent = `Current FPS: ${selectedFps}`;
+  frameDisplay.classList.add("frame-display");
+
+  // Update the frame display whenever the FPS changes
+  select.addEventListener("change", () => {
+    selectedFps = parseInt(select.value);
+    frameDisplay.textContent = `Current FPS: ${selectedFps}`;
+    console.log(`Selected FPS: ${selectedFps}`);
+  });
+
+
+  // Assemble the elements
+  selectorLabel.appendChild(labelText);
+  selectorLabel.appendChild(select);
+  selectorLabel.appendChild(resetButton);
+
+  // Append to the UI container
+  uiContainer.appendChild(selectorLabel);
+  uiContainer.appendChild(frameDisplay); // Append the frame display paragraph
+}
+
+function move() {
+  // Update Pacman's position based on its velocity
+  pacman.x += pacman.velocityX;
+  pacman.y += pacman.velocityY;
+}
+
+function movePacman(e) {
+  if (e.code == "ArrowUp" || e.code == "KeyW") {
+    pacman.updateDirection('U'); // Move up
+  }
+  else if (e.code == "ArrowDown" || e.code == "KeyS") {
+    pacman.updateDirection('D'); // Move down
+  }
+  else if (e.code == "ArrowLeft" || e.code == "KeyA") {
+    pacman.updateDirection('L'); // Move left
+  }
+  else if (e.code == "ArrowRight" || e.code == "KeyD") {
+    pacman.updateDirection('R'); // Move right
+  }
+}
+
+//~ Todo: Create a class for Pacman and Ghosts
+
+
 
 // Class to represent a block in the game
 class Block {
@@ -356,10 +459,38 @@ class Block {
     // Store the starting position of pacman and the ghosts
     this.startX = x;
     this.startY = y;
-  
-  
+
+    this.direction = 'R'; // Default direction for Pacman
+    this.velocityX = 0; // Horizontal velocity
+    this.velocityY = 0; // Vertical velocity
+
+
+  }
+  updateDirection(direction) {
+    this.direction = direction; // R: Right, L: Left, U: Up, D: Down
+    this.updateVelocity();
+
+  }
+
+  updateVelocity() {
+    switch (this.direction) {
+      case 'R':
+        this.velocityX = TILE_SIZE / 4; // Adjusted for smoother movement
+        this.velocityY = 0;
+        break;
+      case 'L':
+        this.velocityX = -TILE_SIZE / 4; // Adjusted for smoother movement
+        this.velocityY = 0;
+        break;
+      case 'U':
+        this.velocityX = 0;
+        this.velocityY = -TILE_SIZE / 4; // Adjusted for smoother movement
+        break;
+      case 'D':
+        this.velocityX = 0;
+        this.velocityY = TILE_SIZE / 4; // Adjusted for smoother movement
+        break;
+    }
   }
 }
-
-
 

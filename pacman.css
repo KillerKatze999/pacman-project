@@ -18,9 +18,9 @@ body {
   display: flex;
   width: 60px;
   height: 34px;
-  margin-top: 100px;
-  margin-left: 600px;
-  margin-right: 600px;
+  margin-top: 50px;
+  margin-left: 50%;
+  transform: translateX(-50%); /* offsets the element by half its own width */
 }
 
 .switch input { 
@@ -67,4 +67,77 @@ input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
+}
+
+
+.selector {
+  display: flex;
+  width: 290px;
+  height: 34px;
+  margin-top: 150%;
+  margin-left: 50%;
+  /* transform: translateX(-50%); /* offsets the element by half its own width */
+  display: inline-flex;
+  align-items: center;
+  top: 20px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 12px;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+}
+
+.selector select {
+  height: 34px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: black;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.reset-button {
+  background-color: #ff3366;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  height: 34px;
+}
+.reset-button:hover {
+  background-color: #ff1a4d;
+}
+.selector-title {
+  font-weight: bold;
+  color: #00ffcc;
+  margin-right: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+}
+
+.frame-display {
+  color: #00ffcc;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin-left: 580%;
+  transform: translateX(-50%); /* offsets the element by half its own width */
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+
+.ui-container {
+  position: absolute;
+  transform: translateX(-50%); /* offsets the element by half its own width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60px;
+  height: 34px;
+  margin-left: 50%;
 }
