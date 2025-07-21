@@ -6,7 +6,7 @@
 [current location](https://youtu.be/WxeTMsaSOaA?t=3214)
 
 
-
+21.07.2025 - added frame rate selector; added collision; ghost move logic;
 
 
 
