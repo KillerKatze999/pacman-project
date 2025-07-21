@@ -29,6 +29,91 @@ let selectedFps = 20;
 let frameDisplay; // Paragraph for displaying FPS
 
 
+//X = wall, O = skip, P = pac man, ' ' = food
+//Ghosts: b = blue, o = orange, p = pink, r = red
+const tileMap = [
+    "XXXXXXXXXXXXXXXXXXX",
+    "X        X        X",
+    "X XX XXX X XXX XX X",
+    "X                 X",
+    "X XX X XXXXX X XX X",
+    "X    X       X    X",
+    "XXXX XXXX XXXX XXXX",
+    "OOOX X       X XOOO",
+    "XXXX X XXrXX X XXXX",
+    "O       bpo       O",
+    "XXXX X XXXXX X XXXX",
+    "OOOX X       X XOOO",
+    "XXXX X XXXXX X XXXX",
+    "X        X        X",
+    "X XX XXX X XXX XX X",
+    "X  X     P     X  X",
+    "XX X X XXXXX X X XX",
+    "X    X   X   X    X",
+    "X XXXXXX X XXXXXX X",
+    "X                 X",
+    "XXXXXXXXXXXXXXXXXXX" 
+];
+
+
+const tileMap2 = [
+    "XXXXXXXXXXXXXXXXXXX",
+    "X        X        X",
+    "X XX XXX X XXX XX X",
+    "X                 X",
+    "X XX X XXXXX X XX X",
+    "X    X       X    X",
+    "XXXX XXXX XXXX XXXX",
+    "OOOX X       X XOOO",
+    "XXXX X XXrXX X XXXX",
+    "O       bpo       O",
+    "XXXX X XXXXX X XXXX",
+    "OOOX X       X XOOO",
+    "XXXX X XXXXX X XXXX",
+    "X      X  XX      X",
+    "XXXXX  X    XXXXXXX",
+    "X   X   P   X     X",
+    "XXXXXXXXXXXXXXXXXXX",
+    "X    X   X   X    X",
+    "X XXXXXX X XXXXXX X",
+    "X                 X",
+    "XXXXXXXXXXXXXXXXXXX" 
+];
+
+const tileMap3 = [
+    "XXXXXXXXXXXXXXXXXXX",
+    "X        X        X",
+    "X XX XXX X XXX XX X",
+    "X                 X",
+    "X XX X XXXXX X XX X",
+    "X    X       X    X",
+    "XXXX XXXX XXXX XXXX",
+    "OOOX X       X XOOO",
+    "XXXX X XXrXX X XXXX",
+    "X       bpo       X",
+    "XXXX X XXXXX X XXXX",
+    "OOOX X       X XOOO",
+    "XXXX X XXXXX X XXXX",
+    "X        X        X",
+    "X XX XXX X XXX XX X",
+    "X  X     P     X  X",
+    "XX X X XXXXX X X XX",
+    "X    X   X   X    X",
+    "X XXXXXX X XXXXXX X",
+    "X                 X",
+    "XXXXXXXXXXXXXXXXXXX" 
+];
+
+const walls = new Set();
+const foods = new Set();
+const ghosts = new Set();
+let pacman;
+
+// Define a list of directions for the ghosts to move
+const ghostDirections = ['U', 'D', 'L', 'R'];
+const verticalDirections = ['U', 'D'];
+
+
 // Displays the board when the page is loaded
 window.onload = function () {
   board = document.getElementById('board');
@@ -39,7 +124,14 @@ window.onload = function () {
   context = board.getContext("2d"); // used for drawing on the board
 
   loadImages();
-  drawBoard();
+  drawBoard(tileMap);
+
+
+  for (let ghost of ghosts.values()) {
+    // Randomly assign a direction to each ghost
+    const randomDirection = ghostDirections[Math.floor(Math.random() * 4)]; // 0-3
+    ghost.updateDirection(randomDirection);
+  }
 
   update();
 
@@ -100,41 +192,6 @@ function checkImageDrawStatus() {
   });
 }
 
-
-
-//X = wall, O = skip, P = pac man, ' ' = food
-//Ghosts: b = blue, o = orange, p = pink, r = red
-const tileMap = [
-    "XXXXXXXXXXXXXXXXXXX",
-    "X        X        X",
-    "X XX XXX X XXX XX X",
-    "X                 X",
-    "X XX X XXXXX X XX X",
-    "X    X       X    X",
-    "XXXX XXXX XXXX XXXX",
-    "OOOX X       X XOOO",
-    "XXXX X XXrXX X XXXX",
-    "O       bpo       O",
-    "XXXX X XXXXX X XXXX",
-    "OOOX X       X XOOO",
-    "XXXX X XXXXX X XXXX",
-    "X        X        X",
-    "X XX XXX X XXX XX X",
-    "X  X     P     X  X",
-    "XX X X XXXXX X X XX",
-    "X    X   X   X    X",
-    "X XXXXXX X XXXXXX X",
-    "X                 X",
-    "XXXXXXXXXXXXXXXXXXX" 
-];
-
-
-const walls = new Set();
-const foods = new Set();
-const ghosts = new Set();
-let pacman;
-
-
 // Function to load the images
 function loadImages() {
 
@@ -166,7 +223,7 @@ function loadImages() {
     pacmanRightImage.src = "./images/pacmanRight.png";
 }
 
-function drawBoard() {
+function drawBoard(tileMap) {
   // Clear the board
   walls.clear();
   foods.clear();
@@ -436,6 +493,34 @@ function move() {
       break; // Exit the loop after the first collision
     }
   }
+
+  // Move each ghost
+  for (let ghost of ghosts.values()) {
+
+    // Check to see if the ghost is on the ninth row and change its direction randomly
+    // This is a simple logic to change the ghost's direction when it reaches a specific row
+    if (ghost.y == TILE_SIZE * 9 && ghost.direction !== 'U' && ghost.direction !== 'D') {
+      // If the ghost is on the ninth row, change its direction
+      const newDirection = verticalDirections[Math.floor(Math.random() * 2)];
+      ghost.updateDirection(newDirection);
+    }
+
+    ghost.x += ghost.velocityX;
+    ghost.y += ghost.velocityY;
+
+    // Check for collisions with walls
+    for (let wall of walls.values()) {
+      if (collisionDetection(ghost, wall) || ghost.x < 0 || ghost.x + ghost.width >= BOARD_WIDTH) {
+        // If there is a collision, revert the ghost's position
+        ghost.x -= ghost.velocityX;
+        ghost.y -= ghost.velocityY;
+        const newDirection = ghostDirections[Math.floor(Math.random() * 4)];
+        ghost.updateDirection(newDirection); // Change direction randomly
+        //ghost.updateVelocity(); // Update the velocity based on the new direction
+        //break; // Exit the loop after the first collision
+      }
+    }
+  }
 }
 
 function movePacman(e) {
@@ -451,8 +536,26 @@ function movePacman(e) {
   else if (e.code == "ArrowRight" || e.code == "KeyD") {
     pacman.updateDirection('R'); // Move right
   }
+
+
+  // Upadate the direction Pacman is facing
+  if (pacman.direction === 'U') {
+    pacman.image = pacmanUpImage;
+  }
+  else if (pacman.direction === 'D') {
+    pacman.image = pacmanDownImage;
+  }
+  else if (pacman.direction === 'L') {
+    pacman.image = pacmanLeftImage;
+  }
+  else if (pacman.direction === 'R') {
+    pacman.image = pacmanRightImage;
+  }
 }
 
+// Function to check for collision between two rectangles
+// a and b are objects with properties: x, y, width, height
+// Returns true if there is a collision, false otherwise
 function collisionDetection(a, b) {
   return  a.x < b.x + b.width &&        // a's top left corner doesn't reach b's top right corner
           a.x + a.width > b.x &&        // a's top right corner passes b's top left corner
@@ -464,8 +567,9 @@ function collisionDetection(a, b) {
 
 
 
-//~ Todo: Create a class for Pacman and Ghosts
-
+//~ Todo: Create a class for Pacman and Ghosts, add a method to have the ghosts chase Pacman, and add a method to have Pacman eat the food
+//~Todo: Add a method to have Pacman eat the ghosts when they are vulnerable, and add a method to have the ghosts respawn after being eaten
+//~Todo: Add a method to have the Ghosts and Pacman return to the other side of the map when they reach the edge
 
 
 // Class to represent a block in the game
