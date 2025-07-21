@@ -426,6 +426,16 @@ function move() {
   // Update Pacman's position based on its velocity
   pacman.x += pacman.velocityX;
   pacman.y += pacman.velocityY;
+
+  // Check for collisions with walls
+  for (let wall of walls.values()) {
+    if (collisionDetection(pacman, wall)) {
+      // If there is a collision, revert Pacman's position
+      pacman.x -= pacman.velocityX;
+      pacman.y -= pacman.velocityY;
+      break; // Exit the loop after the first collision
+    }
+  }
 }
 
 function movePacman(e) {
@@ -442,6 +452,17 @@ function movePacman(e) {
     pacman.updateDirection('R'); // Move right
   }
 }
+
+function collisionDetection(a, b) {
+  return  a.x < b.x + b.width &&        // a's top left corner doesn't reach b's top right corner
+          a.x + a.width > b.x &&        // a's top right corner passes b's top left corner
+          a.y < b.y + b.height &&       // a's top left corner doesn't reach b's bottom left corner
+          a.y + a.height > b.y;         // a's bottom left corner passes b's top left corner
+}
+
+
+
+
 
 //~ Todo: Create a class for Pacman and Ghosts
 
@@ -467,9 +488,24 @@ class Block {
 
   }
   updateDirection(direction) {
+    const previousDirection = this.direction;
     this.direction = direction; // R: Right, L: Left, U: Up, D: Down
     this.updateVelocity();
 
+    this.x += this.velocityX;
+    this.y += this.velocityY;
+
+    for (let wall of walls.values()) {
+      if (collisionDetection(this, wall)) {
+        // If there is a collision, revert to the previous position
+        this.x -= this.velocityX;
+        this.y -= this.velocityY;
+        this.direction = previousDirection; // Revert to the previous direction
+        this.updateVelocity(); // Update the velocity based on the previous direction
+       
+        return; // Exit the loop after the first collision
+      }
+    }
   }
 
   updateVelocity() {
