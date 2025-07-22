@@ -632,5 +632,3 @@ class Block {
         break;
     }
   }
-}
-
