@@ -20,10 +20,11 @@ body {
   height: 34px;
   margin-top: 50px;
   margin-left: 50%;
-  transform: translateX(-50%); /* offsets the element by half its own width */
+  transform: translateX(-50%);
+  /* offsets the element by half its own width */
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -55,15 +56,15 @@ body {
   border-radius: 50px;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #2196F3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #2196F3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
@@ -106,9 +107,11 @@ input:checked + .slider:before {
   cursor: pointer;
   height: 34px;
 }
+
 .reset-button:hover {
   background-color: #ff1a4d;
 }
+
 .selector-title {
   font-weight: bold;
   color: #00ffcc;
@@ -122,7 +125,8 @@ input:checked + .slider:before {
   font-family: Arial, sans-serif;
   font-size: 14px;
   margin-left: 580%;
-  transform: translateX(-50%); /* offsets the element by half its own width */
+  transform: translateX(-50%);
+  /* offsets the element by half its own width */
   display: inline-flex;
   align-items: center;
   border-radius: 6px;
@@ -133,11 +137,27 @@ input:checked + .slider:before {
 
 .ui-container {
   position: absolute;
-  transform: translateX(-50%); /* offsets the element by half its own width */
+  transform: translateX(-50%);
+  /* offsets the element by half its own width */
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 60px;
   height: 34px;
   margin-left: 50%;
+}
+
+
+#restartBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }

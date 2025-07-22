@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tile Map Cleaner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+    }
+
+    textarea {
+      width: 100%;
+      margin-bottom: 1em;
+      font-family: monospace;
+    }
+
+    button {
+      margin-right: 1em;
+      padding: 0.5em 1em;
+    }
+
+    #tileMapOptions {
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🧹 Clean Code & Select Tile Maps to Remove</h1>
+  <textarea id="inputCode" rows="10" placeholder="Paste your code here..."></textarea>
+  <div>
+    <button onclick="detectTileMaps()">Detect Tile Maps</button>
+    <button onclick="removeCommentsAndConsole()">Clean Code</button>
+    <button onclick="cleanAll()">Clear All</button>
+  </div>
+
+  <div id="tileMapOptions"></div>
+
+  <textarea id="outputCode" rows="10" placeholder="Cleaned code will appear here..." readonly></textarea>
+
+  <script>
+    function detectTileMaps() {
+      const inputCode = document.getElementById("inputCode").value;
+      // const tileMapRegex = /(?:const|let)\s+(tileMap\d+)\s*=\s*\[[\s\S]*?\];/gm;
+      const tileMapRegex = /(?:const|let)\s+([a-zA-Z_$][\w$]*)\s*=\s*\[[\s\S]*?\];/gm;
+      const matches = [...inputCode.matchAll(tileMapRegex)];
+
+      const container = document.getElementById("tileMapOptions");
+      container.innerHTML = "<strong>Select tile maps to remove:</strong><br>";
+
+      matches.forEach(match => {
+        const name = match[1];
+        const checkbox = `<label><input type="checkbox" value="${name}" checked> ${name}</label><br>`;
+        container.innerHTML += checkbox;
+      });
+
+      if (matches.length === 0) {
+        container.innerHTML = "<em>No tile maps detected.</em>";
+      }
+    }
+
+    function removeCommentsAndConsole() {
+      let inputCode = document.getElementById("inputCode").value;
+
+      // Remove multi-line comments
+      inputCode = inputCode.replace(/\/\*[\s\S]*?\*\//g, '');
+
+      // Remove selected tile maps
+      const checkboxes = document.querySelectorAll('#tileMapOptions input[type="checkbox"]:checked');
+      checkboxes.forEach(cb => {
+        const name = cb.value;
+        const tileMapPattern = new RegExp(`(?:const|let)\\s+${name}\\s*=\\s*\\[[\\s\\S]*?\\];`, 'gm');
+        inputCode = inputCode.replace(tileMapPattern, '');
+      });
+
+      const lines = inputCode.split('\n');
+      const cleanedLines = lines.map(line => {
+        // Remove single-line comments
+        const commentIndex = line.indexOf("//");
+        if (commentIndex !== -1) line = line.slice(0, commentIndex);
+
+        // Remove console codes
+        line = line.replace(/System\.Console\.Write\("\\x1b\[\d+m"\);/g, '');
+
+        // Remove XML comments
+        line = line.replace(/\/{3}\s*<(summary|param|returns)[^>]*>[\s\S]*?<\/\1>/g, '');
+
+        // Remove HTML comments
+        line = line.replace(/<!--[\s\S]*?-->/gm, '');
+
+          // Trim trailing spaces
+          line = line.replace(/\s+$/, '');
+
+        return line;
+      }).filter(line => line.trim() !== '');
+
+      document.getElementById("outputCode").value = cleanedLines.join('\n');
+    }
+
+    function cleanAll() {
+      document.getElementById("inputCode").value = '';
+      document.getElementById("outputCode").value = '';
+      document.getElementById("tileMapOptions").innerHTML = '';
+    }
+  </script>
+</body>
+
+</html>
