@@ -18,6 +18,7 @@ let frameDisplay; // Paragraph for displaying FPS
 
 
 let updateTimeoutId = null;
+let boardOffsetY = 0;
 
 
 //X = wall, O = skip, P = pac man, ' ' = food
@@ -431,7 +432,8 @@ function drawMarks() {
   // Apply smooth transition style before shifting
   board.style.transition = "ease-in-out 1s";
   // Shift the canvas downward
-  board.style.marginTop = "100px"; // You can adjust this value
+  boardOffsetY = 100; // match the translateY value
+  board.style.transform = `translateY(${boardOffsetY}px)`; // You can adjust this value
 
   context.font = "14px Arial";
   context.fillStyle = "white";
@@ -451,7 +453,7 @@ function drawMarks() {
       } else if (tileMapChar === ' ') {
         context.font = "10px PixelArial11";
         context.fillStyle = "#e0e0e0";
-        context.fillText('•', x + TILE_SIZE / 2, y + TILE_SIZE / 2);
+        //context.fillText('•', x + TILE_SIZE / 2, y + TILE_SIZE / 2);
       }
       else if (tileMapChar === 'O') { // Air
         context.font = "18px PixelArial11";
@@ -488,10 +490,10 @@ function update() {
   updateTimeoutId = setTimeout(update, 1000 / selectedFps); // Use the selected FPS from the dropdown
 }
 
-let hasMeasuredText = false;
+// let hasMeasuredText = false;
 
-let livesX = 500;
-let livesY = 21;
+// let livesX = 500;
+// let livesY = 21;
 
 function draw() {
   // Clear the board
@@ -572,30 +574,26 @@ function draw() {
   if (drawMarksFlag) drawMarks();
 }
 
-function convertToPixels(text, xExpression, yExpression) {
-  const x = eval(xExpression.replace(/TILE_SIZE/g, TILE_SIZE));
-  const y = eval(yExpression.replace(/TILE_SIZE/g, TILE_SIZE));
-  return { x, y, text };
-}
-
-
-const Over = convertToPixels(
-  "Game Over: " + String(score),
-  "TILE_SIZE / 2 + 250",
-  "TILE_SIZE / 2 + 5"
-);
-
-const Score = convertToPixels(
-  "Lives: " + String(lives),
-  "TILE_SIZE / 2 + 532",
-  "TILE_SIZE / 2 + 5"
-);
+// function convertToPixels(text, xExpression, yExpression) {
+//   const x = eval(xExpression.replace(/TILE_SIZE/g, TILE_SIZE));
+//   const y = eval(yExpression.replace(/TILE_SIZE/g, TILE_SIZE));
+//   return { x, y, text };
+// }
+// const Over = convertToPixels(
+//   "Game Over: " + String(score),
+//   "TILE_SIZE / 2 + 250",
+//   "TILE_SIZE / 2 + 5"
+// );
+// const Score = convertToPixels(
+//   "Lives: " + String(lives),
+//   "TILE_SIZE / 2 + 532",
+//   "TILE_SIZE / 2 + 5"
+// );
 
 //console.log(Over); // { x: 266, y: 21, text: "Game Over: 0" }
 //console.log(Score); // { x: 548, y: 21, text: "Lives: 3" }
 
 function drawSwitch() {
-
   const uiContainer = document.createElement("div");
   uiContainer.classList.add("ui-container");
 
@@ -623,13 +621,23 @@ function drawSwitch() {
     if (checkbox.checked) {
       drawMarksFlag = true;
       drawMarks(); // Call your function when switch is ON
+      lives = 999;
     } else {
+      lives = 3;
       drawMarksFlag = false;
-      board.style.marginTop = "0px"; // Example of undoing a change
+      board.style.transform = "translateY(0)"; // Example of undoing a change
       // You can also add a clearOverlay() or redrawBoard() if needed
+      resetBoardOffset(); // Reset transform and offset
     }
   });
 }
+
+// Helper function to reset the label offset
+function resetBoardOffset() {
+  boardOffsetY = 0;
+  board.style.transform = "translateY(0)";
+}
+
 
 function drawSelector() {
   const uiContainer = document.querySelector(".ui-container");
@@ -699,7 +707,7 @@ function move() {
     const centerY = pacman.y % TILE_SIZE === 0;
 
     if ((pacman.nextDirection === 'L' || pacman.nextDirection === 'R') && centerY ||
-        (pacman.nextDirection === 'U' || pacman.nextDirection === 'D') && centerX) {
+      (pacman.nextDirection === 'U' || pacman.nextDirection === 'D') && centerX) {
       const oldDirection = pacman.direction;
       pacman.updateDirection(pacman.nextDirection);
 
@@ -782,10 +790,18 @@ function move() {
         foodEaten = food; // Set the foodEaten flag
         score += 10; // Increase score by 10 for each food eaten
         // If Pacman collides with food, remove the food and increase the score
-        foods.delete(food);
         console.log(`Score: ${score}`); // Log the score to the console
         break; // Exit the loop after eating one food
       }
+    }
+    foods.delete(foodEaten);
+
+
+
+    // next level
+    if (foods.size == 0) {
+      drawBoard(tileMap);
+      resetPositions();
     }
   }
 }
@@ -841,7 +857,6 @@ function restartGame() {
     updateTimeoutId = null;
   }
 
-  gameRunning = true;
   gameOver = false;
   score = 0;
   lives = 3;
@@ -902,23 +917,12 @@ class Block {
   }
 
   updateVelocity() {
+    let val = 8; // 4 -> Adjusted for smoother movement
     switch (this.direction) {
-      case 'R':
-        this.velocityX = TILE_SIZE / 4; // Adjusted for smoother movement
-        this.velocityY = 0;
-        break;
-      case 'L':
-        this.velocityX = -TILE_SIZE / 4; // Adjusted for smoother movement
-        this.velocityY = 0;
-        break;
-      case 'U':
-        this.velocityX = 0;
-        this.velocityY = -TILE_SIZE / 4; // Adjusted for smoother movement
-        break;
-      case 'D':
-        this.velocityX = 0;
-        this.velocityY = TILE_SIZE / 4; // Adjusted for smoother movement
-        break;
+      case "R": this.velocityX = TILE_SIZE / val, this.velocityY = 0; break;
+      case "L": this.velocityX = -TILE_SIZE / val, this.velocityY = 0; break;
+      case "U": this.velocityX = 0, this.velocityY = -TILE_SIZE / val; break;
+      case "D": this.velocityX = 0, this.velocityY = TILE_SIZE / val;
     }
   }
 

@@ -1,0 +1,20 @@
+#nebula-credit {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Rubik Glitch", system-ui;
+  font-size: 14px;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "EDPT" 100,
+    "EHLT" 12;
+  opacity: 0;
+  color: blue;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px 10px #a600ff;
+}

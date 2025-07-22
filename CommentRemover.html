@@ -25,6 +25,7 @@
       margin-bottom: 1em;
     }
   </style>
+  <script src="https://unpkg.com/acorn@8.11.3/dist/acorn.js"></script>
 </head>
 
 <body>
@@ -32,13 +33,15 @@
   <textarea id="inputCode" rows="10" placeholder="Paste your code here..."></textarea>
   <div>
     <button onclick="detectTileMaps()">Detect Tile Maps</button>
+    <button onclick="detectFunctions()">Detect Functions</button>
     <button onclick="removeCommentsAndConsole()">Clean Code</button>
     <button onclick="cleanAll()">Clear All</button>
   </div>
 
   <div id="tileMapOptions"></div>
+  <div id="functionOptions" style="margin-bottom: 1em;"></div>
 
-  <textarea id="outputCode" rows="10" placeholder="Cleaned code will appear here..." readonly></textarea>
+  <textarea id="outputCode" rows="10" placeholder="Cleaned code will appear here..."></textarea>
 
   <script>
     function detectTileMaps() {
@@ -52,7 +55,7 @@
 
       matches.forEach(match => {
         const name = match[1];
-        const checkbox = `<label><input type="checkbox" value="${name}" checked> ${name}</label><br>`;
+        const checkbox = `<label><input type="checkbox" value="${name}"> ${name}</label><br>`;
         container.innerHTML += checkbox;
       });
 
@@ -60,6 +63,129 @@
         container.innerHTML = "<em>No tile maps detected.</em>";
       }
     }
+
+    // function detectFunctions1() {
+    //   const inputCode = document.getElementById("inputCode").value;
+    //   const functionRegex = /function\s+([a-zA-Z_$][\w$]*)\s*\(/gm;
+    //   const matches = [...inputCode.matchAll(functionRegex)];
+
+    //   const container = document.getElementById("functionOptions");
+    //   container.innerHTML = "<strong>Select functions to remove:</strong><br>";
+
+    //   if (matches.length === 0) {
+    //     container.innerHTML = "<em>No functions detected.</em>";
+    //     return;
+    //   }
+
+    //   // Use a Set to avoid duplicate function names
+    //   const seenFunctions = new Set();
+
+    //   matches.forEach(match => {
+    //     const fnName = match[1];
+    //     if (!seenFunctions.has(fnName)) {
+    //       seenFunctions.add(fnName);
+    //       const checkbox = `<label><input type="checkbox" value="${fnName}"> ${fnName}</label><br>`;
+    //       container.innerHTML += checkbox;
+    //     }
+    //   });
+    //   console.log("Detected functions:", Array.from(seenFunctions));
+    // }
+
+    function detectFunctions() {
+      const inputCode = document.getElementById("inputCode").value;
+      const container = document.getElementById("functionOptions");
+
+      console.log("Code being parsed:", inputCode);
+
+
+      container.innerHTML = "<strong>Select functions to remove:</strong><br>";
+
+      let ast;
+      try {
+        ast = window.acorn.parse(inputCode, { ecmaVersion: 2020, sourceType: "script" });
+      } catch (e) {
+        container.innerHTML = "<em>Error parsing code.</em>";
+        console.error(e);
+        return;
+      }
+
+      const seenFunctions = new Set();
+
+      walkAST(ast, node => {
+        // 1. Regular named function
+        if (node.type === "FunctionDeclaration" && node.id && node.id.name) {
+          seenFunctions.add(node.id.name);
+        }
+
+        // 2. const fn = function() {} or const fn = () => {}
+        else if (
+          node.type === "VariableDeclarator" &&
+          node.id?.name &&
+          node.init &&
+          (node.init.type === "FunctionExpression" || node.init.type === "ArrowFunctionExpression")
+        ) {
+          seenFunctions.add(node.id.name);
+        }
+
+        // 3. Object method or function assigned in object
+        else if (
+          node.type === "Property" &&
+          ((node.value && node.value.type === "FunctionExpression") || node.method === true) &&
+          node.key?.name
+        ) {
+          seenFunctions.add(node.key.name);
+        }
+
+        // 4. Class methods
+        else if (
+          node.type === "MethodDefinition" &&
+          node.key?.name &&
+          (node.kind === "method" || node.kind === "constructor")
+        ) {
+          seenFunctions.add(node.key.name);
+        }
+      });
+
+      if (seenFunctions.size === 0) {
+        container.innerHTML = "<em>No functions detected.</em>";
+        return;
+      }
+
+      for (let fnName of seenFunctions) {
+        const checkbox = `<label><input type="checkbox" value="${fnName}"> ${fnName}</label><br>`;
+        container.innerHTML += checkbox;
+      }
+
+      console.log("Detected functions:", Array.from(seenFunctions));
+    }
+
+    function walkAST(node, callback) {
+      if (!node || typeof node.type !== "string") return;
+
+      // Debug log to see what it's walking
+      console.log("Visiting node:", node.type);
+
+      callback(node);
+
+      for (const key in node) {
+        if (Object.prototype.hasOwnProperty.call(node, key)) {
+          const child = node[key];
+
+          if (Array.isArray(child)) {
+            for (const c of child) {
+              if (c && typeof c.type === "string") {
+                walkAST(c, callback);
+              }
+            }
+          } else if (child && typeof child.type === "string") {
+            walkAST(child, callback);
+          }
+        }
+      }
+    }
+
+
+
 
     function removeCommentsAndConsole() {
       let inputCode = document.getElementById("inputCode").value;
@@ -73,6 +199,17 @@
         const name = cb.value;
         const tileMapPattern = new RegExp(`(?:const|let)\\s+${name}\\s*=\\s*\\[[\\s\\S]*?\\];`, 'gm');
         inputCode = inputCode.replace(tileMapPattern, '');
+      });
+
+      // Remove selected functions
+      const fnCheckboxes = document.querySelectorAll('#functionOptions input[type="checkbox"]:checked');
+      fnCheckboxes.forEach(cb => {
+        const fn = cb.value;
+        const fnPattern = new RegExp(`function\\s+${fn}\\s*\\([^)]*\\)\\s*\\{[\\s\\S]*?\\}`, 'gm');
+        inputCode = inputCode.replace(fnPattern, '');
+
+        const callPattern = new RegExp(`${fn}\\s*\\([^)]*\\);?`, 'gm');
+        inputCode = inputCode.replace(callPattern, '');
       });
 
       const lines = inputCode.split('\n');
@@ -98,6 +235,7 @@
 
       document.getElementById("outputCode").value = cleanedLines.join('\n');
     }
+
 
     function cleanAll() {
       document.getElementById("inputCode").value = '';
