@@ -82,7 +82,7 @@ const tileMap3 = [
   "XXXX XXXX XXXX XXXX",
   "OOOX X       X XOOO",
   "XXXX X XXrXX X XXXX",
-  "X       bpo       X",
+  "O       bpo       O",
   "XXXX X XXXXX X XXXX",
   "OOOX X       X XOOO",
   "XXXX X XXXXX X XXXX",
@@ -670,7 +670,7 @@ function drawSelector() {
   resetButton.textContent = "Reset FPS";
   resetButton.classList.add("reset-button");
   resetButton.addEventListener("click", () => {
-    selectedFps = 20; // Reset to default FPS
+    selectedFps = 10; // Reset to default FPS
     select.value = selectedFps; // Update the select input
     frameDisplay.textContent = `Current FPS: ${selectedFps}`; // Update the display
     console.log(`FPS reset to: ${selectedFps}`);
@@ -701,6 +701,25 @@ function drawSelector() {
 
 
 function move() {
+  // Local tunnel function for Pacman
+  function tunnelPacman() {
+    if (pacman.x + pacman.width < 0) {
+      pacman.x = BOARD_WIDTH;
+    } else if (pacman.x > BOARD_WIDTH) {
+      pacman.x = -pacman.width;
+    }
+  }
+
+  // Local tunnel function for ghosts
+  function tunnelGhosts(ghost) {
+    if (ghost.x < 0) {
+      ghost.x = BOARD_WIDTH - ghost.width;
+    } else if (ghost.x + ghost.width > BOARD_WIDTH) {
+      ghost.x = 0;
+    }
+  }
+
+
   // Try to turn if aligned with tile center
   if (pacman.nextDirection) {
     const centerX = pacman.x % TILE_SIZE === 0;
@@ -735,6 +754,10 @@ function move() {
     }
   }
 
+  // Tunnel behavior for Pacman
+  if (pacman.y === TILE_SIZE * 9) {
+    tunnelPacman();
+  }
   // Move each ghost
   for (let ghost of ghosts.values()) {
     // Check for collisions with Pacman
@@ -758,7 +781,6 @@ function move() {
       }
     }
 
-
     // Check to see if the ghost is on the ninth row and change its direction randomly
     // This is a simple logic to change the ghost's direction when it reaches a specific row
     if (ghost.y == TILE_SIZE * 9 && ghost.direction !== 'U' && ghost.direction !== 'D') {
@@ -771,18 +793,34 @@ function move() {
     ghost.y += ghost.velocityY;
 
     // Check for collisions with walls
+    // for (let wall of walls.values()) {
+    //   if (collisionDetection(ghost, wall) || ghost.x < 0 || ghost.x + ghost.width >= BOARD_WIDTH) {
+    //     // If there is a collision, revert the ghost's position
+    //     ghost.x -= ghost.velocityX;
+    //     ghost.y -= ghost.velocityY;
+    //     const newDirection = ghostDirections[Math.floor(Math.random() * 4)];
+    //     ghost.updateDirection(newDirection); // Change direction randomly
+    //     //ghost.updateVelocity(); // Update the velocity based on the new direction
+    //     //break; // Exit the loop after the first collision
+    //   }
+    // }
+
+    // Check for collisions with walls
     for (let wall of walls.values()) {
-      if (collisionDetection(ghost, wall) || ghost.x < 0 || ghost.x + ghost.width >= BOARD_WIDTH) {
+      if (collisionDetection(ghost, wall)) {
         // If there is a collision, revert the ghost's position
         ghost.x -= ghost.velocityX;
         ghost.y -= ghost.velocityY;
         const newDirection = ghostDirections[Math.floor(Math.random() * 4)];
         ghost.updateDirection(newDirection); // Change direction randomly
-        //ghost.updateVelocity(); // Update the velocity based on the new direction
         //break; // Exit the loop after the first collision
       }
     }
 
+    // Tunnel behavior for ghost
+    if (ghost.y === TILE_SIZE * 9) {
+      tunnelGhosts(ghost);
+    }
     // Check for collisions with foods
     let foodEaten = null; // Flag to check if food is eaten
     for (let food of foods.values()) {
@@ -795,8 +833,6 @@ function move() {
       }
     }
     foods.delete(foodEaten);
-
-
 
     // next level
     if (foods.size == 0) {
@@ -929,5 +965,9 @@ class Block {
   reset() {
     this.x = this.startX;
     this.y = this.startY;
+
+    this.direction = 'R';
+    this.velocityX = 0;
+    this.velocityY = 0;
   }
 }
