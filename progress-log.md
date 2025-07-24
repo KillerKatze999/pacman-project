@@ -8,6 +8,7 @@
 
 22.07.2025 - added gameOver functionality and updated CommentRemover
 
+24.07.2025 - added tunnel behavior for Pac-Man and ghosts
 
 [current location](https://youtu.be/WxeTMsaSOaA?t=3949)
 
