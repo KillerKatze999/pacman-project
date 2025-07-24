@@ -10,9 +10,11 @@
 
 24.07.2025 - added tunnel behavior for Pac-Man and ghosts
 
-[current location](https://youtu.be/WxeTMsaSOaA?t=3949)
+[old Vid](https://youtu.be/WxeTMsaSOaA)
+https://github.com/ImKennyYip/pacman#
 
 
 https://www.nobledesktop.com/learn/git/git-branches
 https://www.asciiart.eu/image-to-ascii
-https://github.com/ImKennyYip/pacman#
+
+
