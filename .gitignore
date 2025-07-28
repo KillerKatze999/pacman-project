@@ -13,3 +13,4 @@ node_modules/animejs/lib/anime.umd.js
 node_modules/animejs/lib/anime.umd.min.js
 node_modules/animejs/types/index.d.ts
 node_modules/animejs/types/index.js
+scripts/compare_singleFile.sh
