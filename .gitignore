@@ -1,16 +1,3 @@
 pacmanminfied.js
-node_modules/.package-lock.json
-node_modules/animejs/LICENSE.md
-node_modules/animejs/package.json
-node_modules/animejs/README.md
-node_modules/animejs/lib/anime.cjs
-node_modules/animejs/lib/anime.esm.js
-node_modules/animejs/lib/anime.esm.min.js
-node_modules/animejs/lib/anime.iife.js
-node_modules/animejs/lib/anime.iife.min.js
-node_modules/animejs/lib/anime.min.cjs
-node_modules/animejs/lib/anime.umd.js
-node_modules/animejs/lib/anime.umd.min.js
-node_modules/animejs/types/index.d.ts
-node_modules/animejs/types/index.js
+node_modules
 scripts/compare_singleFile.sh
