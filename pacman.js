@@ -3,11 +3,7 @@ let board, context;
 const TILE_SIZE = 32, ROW_COUNT = 21, COLUMN_COUNT = 19, BOARD_WIDTH = COLUMN_COUNT * TILE_SIZE, BOARD_HEIGHT = ROW_COUNT * TILE_SIZE;
 
 // Game Asset Images
-let wallImage;
-
-let pacmanUpImage, pacmanDownImage, pacmanLeftImage, pacmanRightImage;
-
-let blueGhostImage, orangeGhostImage, pinkGhostImage, redGhostImage;
+let wallImage, pacmanUpImage, pacmanDownImage, pacmanLeftImage, pacmanRightImage, blueGhostImage, orangeGhostImage, pinkGhostImage, redGhostImage;
 
 // Flag to toggle the drawing of marks
 let drawMarksFlag = false;
@@ -65,30 +61,6 @@ const tileMap2 = [
   "XXXXX  X    XXXXXXX",
   "X   X   P   X     X",
   "XXXXXXXXXXXXXXXXXXX",
-  "X    X   X   X    X",
-  "X XXXXXX X XXXXXX X",
-  "X                 X",
-  "XXXXXXXXXXXXXXXXXXX"
-];
-
-const tileMap3 = [
-  "XXXXXXXXXXXXXXXXXXX",
-  "X        X        X",
-  "X XX XXX X XXX XX X",
-  "X                 X",
-  "X XX X XXXXX X XX X",
-  "X    X       X    X",
-  "XXXX XXXX XXXX XXXX",
-  "OOOX X       X XOOO",
-  "XXXX X XXrXX X XXXX",
-  "O       bpo       O",
-  "XXXX X XXXXX X XXXX",
-  "OOOX X       X XOOO",
-  "XXXX X XXXXX X XXXX",
-  "X        X        X",
-  "X XX XXX X XXX XX X",
-  "X  X     P     X  X",
-  "XX X X XXXXX X X XX",
   "X    X   X   X    X",
   "X XXXXXX X XXXXXX X",
   "X                 X",
@@ -614,13 +586,15 @@ function drawSwitch() {
 
   // Append to the body or any other container
 
-  uiContainer.appendChild(switchLabel);
+  //uiContainer.appendChild(switchLabel);
   document.body.appendChild(uiContainer);
   checkbox.addEventListener("change", () => {
     if (checkbox.checked) {
       drawMarksFlag = true;
-      drawMarks(); // Call your function when switch is ON
+      boardOffsetY = 100;
+      board.style.transform = `translateY(${boardOffsetY}px)`; // Apply shift
       lives = 999;
+      drawMarks(); // Call your function when switch is ON
     } else {
       lives = 3;
       drawMarksFlag = false;
@@ -634,7 +608,7 @@ function drawSwitch() {
 // Helper function to reset the label offset
 function resetBoardOffset() {
   boardOffsetY = 0;
-  board.style.transform = "translateY(0)";
+  draw();
 }
 
 

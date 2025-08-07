@@ -1,33 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pac-Man</title>
-  <link rel="stylesheet" href="pacman.css">
-
-  <!-- anime js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <link rel="stylesheet" href="animations/animations.css">
-
-
-  <!-- Google Fonts-->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap" rel="stylesheet">
-</head>
-
-<body>
-  <canvas id="board"></canvas>
-  <button id="restartBtn" style="display: none;" onclick="restartGame()">Restart Game</button>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pac-Man</title>
+    <link rel="stylesheet" href="pacman.css">
+    <link rel="stylesheet" href="pacman2.css">
+    
+    <!-- anime js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="stylesheet" href="animations/animations.css">
 
 
+    <!-- Google Fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap" rel="stylesheet">
 
-  <script src="pacman.js"> _ </script>
+  </head>
 
-  <div id="nebula-credit">made with love by <em>KillerKatze999</em> ❤️</div>
-  <script src="animations/animations.js"></script>
-</body>
+  <body>
 
+    <canvas id="board"></canvas>
+    <button id="restartBtn" style="display: none;" onclick="restartGame()">Restart Game</button>
+
+
+
+    <script src="pacman.js"> _ </script>
+
+    <div id="nebula-credit">made with love by <em>KillerKatze999</em> ❤️</div>
+
+    <script src="animations/animations.js"></script>
+
+
+    <script>
+      function drawToggle() {
+        const uiContainer = document.createElement("div");
+        uiContainer.classList.add("ui-container-animation");
+
+        // Create the container label
+        const switchLabel = document.createElement("label");
+        switchLabel.classList.add("switch-animation");
+
+        // Create the checkbox input
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+
+        // Create the slider span
+        const sliderSpan = document.createElement("span");
+        sliderSpan.classList.add("slider-animation");
+
+        // Assemble the elements
+        switchLabel.appendChild(checkbox);
+        switchLabel.appendChild(sliderSpan);
+
+        // Append to the body or any other container
+
+        uiContainer.appendChild(switchLabel);
+        document.body.appendChild(uiContainer);
+        checkbox.addEventListener("change", () => {
+          toggleAnimation(checkbox);
+        });
+      }
+      
+      
+      drawToggle();
+    
+
+      function toggleAnimation(checkbox) {
+        if (checkbox.checked) {
+          console.log("checked bro");
+          stopAnimnations();
+        } else {
+          console.log("not checked bro");
+          if (typeof nebulaPulse !== undefined) {
+            nebulaPulse.play();
+          }
+        }
+      }
+
+      function stopAnimnations() {
+        if (typeof nebulaPulse !== undefined) {
+          nebulaPulse.pause();
+        }
+      }
+    </script>
+  </body>
 </html>

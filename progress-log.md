@@ -10,6 +10,8 @@
 
 24.07.2025 - added tunnel behavior for Pac-Man and ghosts
 
+07.08.2025 - added animation switch
+
 [old Vid](https://youtu.be/WxeTMsaSOaA)
 https://github.com/ImKennyYip/pacman#
 

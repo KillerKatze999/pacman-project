@@ -1,3 +1,6 @@
+let nebulaPulse;
+
+
 document.addEventListener("DOMContentLoaded", () => {
   anime({
     targets: '#nebula-credit',
@@ -8,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     delay: 1000
   });
 
-  anime({
+  nebulaPulse = anime({
     targets: '#nebula-credit',
     scale: [1, 1.05],
     direction: 'alternate',
