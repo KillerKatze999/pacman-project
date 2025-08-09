@@ -388,7 +388,7 @@ function drawBoard(tileMap) {
         update();
       }
       else if (tileMapChar === ' ') {
-        const food = new Block(null, x + 14, y + 14, 4, 4); // Small food block
+        const food = new Food(x + 14, y + 14);
         foods.add(food);
       }
     }
@@ -475,8 +475,7 @@ function draw() {
   // Draw ghosts
   ghosts.forEach(ghost => {
     context.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height);
-  }
-  );
+  });
 
   // for (let ghost of ghosts.values()) {
   //   context.drawImage(ghost.image, ghost.x, ghost.y, ghost.width, ghost.height);
@@ -485,24 +484,27 @@ function draw() {
   // Draw walls
   walls.forEach(wall => {
     context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height);
-  }
-  );
+  });
 
   // for (let wall of walls.values()) {
   //   context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height);
   // }
 
   // Draw foods
-  foods.forEach(food => {
-    if (food.image) {
-      context.drawImage(food.image, food.x, food.y, food.width, food.height);
-    } else {
-      context.fillStyle = "yellow"; // Color for the small food
-      context.fillRect(food.x, food.y, food.width, food.height);
-    }
-  }
-  );
+  // foods.forEach(food => {
+  //   if (food.image) {
+  //     context.drawImage(food.image, food.x, food.y, food.width, food.height);
+  //   } else {
+  //     context.fillStyle = "yellow"; // Color for the small food
+  //     context.fillRect(food.x, food.y, food.width, food.height);
+  //   }
+  // });
 
+  foods.forEach(food => {
+    if (typeof food.draw === "function") {
+      food.draw(context);
+    }
+  });
 
   // Score
   context.fillStyle = "white";
@@ -947,5 +949,21 @@ class Block {
     this.direction = 'R';
     this.velocityX = 0;
     this.velocityY = 0;
+  }
+}
+
+// Class to represent the food
+class Food {
+  constructor(x, y, size = 4, color = "yellow") {
+    this.x = x;
+    this.y = y;
+    this.width = size;
+    this.height = size;
+    this.color = color;
+  }
+
+  draw(ctx) {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 }
