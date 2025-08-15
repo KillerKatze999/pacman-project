@@ -368,19 +368,23 @@ function drawBoard(tileMap) {
         walls.add(wallBlock);
       }
       else if (tileMapChar === 'b') { // Blue Ghost
-        const ghost = new Block(blueGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        //const ghost = new Block(blueGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        const ghost = new Ghost(blueGhostImage, x, y, TILE_SIZE, TILE_SIZE);
         ghosts.add(ghost);
       }
       else if (tileMapChar === 'o') { // Orange Ghost
-        const ghost = new Block(orangeGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        //const ghost = new Block(orangeGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        const ghost = new Ghost(orangeGhostImage, x, y, TILE_SIZE, TILE_SIZE);
         ghosts.add(ghost);
       }
       else if (tileMapChar === 'p') { // Pink Ghost
-        const ghost = new Block(pinkGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        //const ghost = new Block(pinkGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        const ghost = new Ghost(pinkGhostImage, x, y, TILE_SIZE, TILE_SIZE);
         ghosts.add(ghost);
       }
       else if (tileMapChar === 'r') { // Red Ghost
-        const ghost = new Block(redGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        //const ghost = new Block(redGhostImage, x, y, TILE_SIZE, TILE_SIZE);
+        const ghost = new Ghost(redGhostImage, x, y, TILE_SIZE, TILE_SIZE);
         ghosts.add(ghost);
       }
       else if (tileMapChar === 'P') { // Pacman
@@ -674,8 +678,7 @@ function drawSelector() {
   uiContainer.appendChild(frameDisplay); // Append the frame display paragraph
 }
 
-
-function move() {
+function move2() {
   // Local tunnel function for Pacman
   function tunnelPacman() {
     if (pacman.x + pacman.width < 0) {
@@ -816,6 +819,159 @@ function move() {
     }
   }
 }
+
+function move() {
+  controlPacman();
+
+  for (let ghost of ghosts.values()) {
+    const interrupted = controlGhost(ghost);
+    if (interrupted) return;
+  }
+}
+
+
+function controlPacman() {
+  // Try to turn if aligned with tile center
+  if (pacman.nextDirection) {
+    const centerX = pacman.x % TILE_SIZE === 0;
+    const centerY = pacman.y % TILE_SIZE === 0;
+
+    if ((pacman.nextDirection === 'L' || pacman.nextDirection === 'R') && centerY ||
+      (pacman.nextDirection === 'U' || pacman.nextDirection === 'D') && centerX) {
+      const oldDirection = pacman.direction;
+      pacman.updateDirection(pacman.nextDirection);
+
+      // If direction successfully changed, update image
+      if (pacman.direction !== oldDirection) {
+        if (pacman.direction === 'U') pacman.image = pacmanUpImage;
+        else if (pacman.direction === 'D') pacman.image = pacmanDownImage;
+        else if (pacman.direction === 'L') pacman.image = pacmanLeftImage;
+        else if (pacman.direction === 'R') pacman.image = pacmanRightImage;
+      }
+    }
+  }
+
+  // Update Pacman's position based on its velocity
+  pacman.x += pacman.velocityX;
+  pacman.y += pacman.velocityY;
+
+  // Check for collisions with walls
+  for (let wall of walls.values()) {
+    if (collisionDetection(pacman, wall)) {
+      // If there is a collision, revert Pacman's position
+      pacman.x -= pacman.velocityX;
+      pacman.y -= pacman.velocityY;
+      break; // Exit the loop after the first collision
+    }
+  }
+
+  // Tunnel behavior for Pacman
+  if (pacman.y === TILE_SIZE * 9) {
+    tunnelPacman();
+  }
+
+   // Check for collisions with foods
+    let foodEaten = null; // Flag to check if food is eaten
+    for (let food of foods.values()) {
+      if (collisionDetection(pacman, food)) {
+        foodEaten = food; // Set the foodEaten flag
+        score += 10; // Increase score by 10 for each food eaten
+        // If Pacman collides with food, remove the food and increase the score
+        console.log(`Score: ${score}`); // Log the score to the console
+        break; // Exit the loop after eating one food
+      }
+    }
+    foods.delete(foodEaten);
+
+    // next level
+    if (foods.size == 0) {
+      drawBoard(tileMap);
+      resetPositions();
+    }
+
+  // Local tunnel function for Pacman
+  function tunnelPacman() {
+    if (pacman.x + pacman.width < 0) {
+      pacman.x = BOARD_WIDTH;
+    } else if (pacman.x > BOARD_WIDTH) {
+      pacman.x = -pacman.width;
+    }
+  }
+}
+
+function controlGhost(ghost) {
+   // Check for collisions with Pacman
+    if (collisionDetection(pacman, ghost)) {
+      // If Pacman collides with a ghost, reduce lives and reset positions
+      lives -= 1; // Reduce lives by 1
+
+      if (lives == 0) {
+        gameOver = true; // Set game over flag if lives reach 0
+        console.log("Game Over");
+        document.getElementById("restartBtn").style.display = "block";
+        return;
+      }
+
+      resetPositions(); // Reset positions of Pacman and ghosts
+
+      // Optionally, reset ghosts' positions as well
+      for (let ghost of ghosts.values()) {
+        ghost.x = ghost.startX;
+        ghost.y = ghost.startY;
+      }
+    }
+
+    // Check to see if the ghost is on the ninth row and change its direction randomly
+    // This is a simple logic to change the ghost's direction when it reaches a specific row
+    if (ghost.y == TILE_SIZE * 9 && ghost.direction !== 'U' && ghost.direction !== 'D') {
+      // If the ghost is on the ninth row, change its direction
+      const newDirection = verticalDirections[Math.floor(Math.random() * 2)];
+      ghost.updateDirection(newDirection);
+    }
+
+    ghost.x += ghost.velocityX;
+    ghost.y += ghost.velocityY;
+
+    // Check for collisions with walls
+    // for (let wall of walls.values()) {
+    //   if (collisionDetection(ghost, wall) || ghost.x < 0 || ghost.x + ghost.width >= BOARD_WIDTH) {
+    //     // If there is a collision, revert the ghost's position
+    //     ghost.x -= ghost.velocityX;
+    //     ghost.y -= ghost.velocityY;
+    //     const newDirection = ghostDirections[Math.floor(Math.random() * 4)];
+    //     ghost.updateDirection(newDirection); // Change direction randomly
+    //     //ghost.updateVelocity(); // Update the velocity based on the new direction
+    //     //break; // Exit the loop after the first collision
+    //   }
+    // }
+
+    // Check for collisions with walls
+    for (let wall of walls.values()) {
+      if (collisionDetection(ghost, wall)) {
+        // If there is a collision, revert the ghost's position
+        ghost.x -= ghost.velocityX;
+        ghost.y -= ghost.velocityY;
+        const newDirection = ghostDirections[Math.floor(Math.random() * 4)];
+        ghost.updateDirection(newDirection); // Change direction randomly
+        //break; // Exit the loop after the first collision
+      }
+    }
+
+    // Tunnel behavior for ghost
+    if (ghost.y === TILE_SIZE * 9) {
+      tunnelGhosts(ghost);
+    }
+
+  // Local tunnel function for ghosts
+  function tunnelGhosts(ghost) {
+    if (ghost.x < 0) {
+      ghost.x = BOARD_WIDTH - ghost.width;
+    } else if (ghost.x + ghost.width > BOARD_WIDTH) {
+      ghost.x = 0;
+    }
+  }
+}
+
 
 function movePacman(e) {
   let dir = null;
@@ -965,5 +1121,33 @@ class Food {
   draw(ctx) {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+}
+
+// Class to represent the ghosts
+class Ghost extends Block {
+  constructor(image, x, y, width, height) {
+    super(image, x, y, width, height);
+  }
+
+  move() {
+    this.x += this.velocityX;
+    this.y += this.velocityY;
+
+    for (let wall of walls.values()) {
+      if (collisionDetection(this, wall) || this.x < 0 || this.x + this.width >= BOARD_WIDTH) {
+        this.x -= this.velocityX;
+        this.y -= this.velocityY;
+        const newDirection = ghostDirections[Math.floor(Math.random() * 4)];
+        this.updateDirection(newDirection);
+        break;
+      }
+    }
+
+    // Optional vertical switch logic
+    if  (this.y === TILE_SIZE * 9 && this.direction !== "U" && this.direction !== "D") {
+      const newDirecttion = verticalDirections[Math.floor(Math.random() * 2)];
+      this.updateDirection(newDirecttion);
+    }
   }
 }
